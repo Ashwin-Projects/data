@@ -9,10 +9,10 @@ This document serves as the master execution roadmap for DataDignity. It reflect
 
 - [x] Inspect existing repository state, PDF specifications, and frontend structure.
 - [x] Establish root-level project management documents (`CLAUDE.md`, `DEVELOPMENT_PLAN.md`).
-- [ ] Create `THREAT_MODEL.md` defining zero-knowledge trust boundaries, threat vectors, and mitigation strategies.
-- [ ] Document key lifecycle specifications (DEK generation, beneficiary key-wrapping, DEK rotation).
-- [ ] Document lifecycle states, warning stage intervals, and asset policy rules (`LEGACY`, `SCRUB`, `UNCLASSIFIED`, `SAFE HOLD`).
-- [ ] Establish directory structure for backend service and shared contracts.
+- [x] Create `THREAT_MODEL.md` defining zero-knowledge trust boundaries, threat vectors, server visibility matrix, threat scenarios, and security rules.
+- [x] Create `KEY_LIFECYCLE_SPEC.md` defining key hierarchy, AES-GCM-256 DEK generation, beneficiary key-wrapping, SHA-256 fingerprint verification, DEK rotation, and server visibility constraints.
+- [x] Create `STATE_MACHINE_SPEC.md` defining core lifecycle states, transition matrix, liveness hierarchy, Day 60/75/85/90+ warning schedules, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency rules, and Mermaid state diagram.
+- [ ] Establish directory structure for backend service (`backend/package.json`, `server.js`, directory skeletons) and shared contracts.
 
 ---
 

@@ -15,6 +15,9 @@ data dignity/
 ├── README.md                            # High-level architecture overview & quickstart guide
 ├── CLAUDE.md                            # Living development-state document (This file)
 ├── DEVELOPMENT_PLAN.md                  # Condensed, actionable 13-phase roadmap
+├── THREAT_MODEL.md                      # Threat model, trust boundaries & security rules
+├── KEY_LIFECYCLE_SPEC.md                # Key hierarchy, DEK wrapping, fingerprinting & rotation spec
+├── STATE_MACHINE_SPEC.md                # Inactivity states, warning schedules, cancellation & safety gate spec
 └── frontend/                            # React + Vite frontend application
     ├── index.html                       # HTML entry point
     ├── package.json                     # Frontend dependencies (React 18, Vite 5, TailwindCSS 3)
@@ -50,6 +53,9 @@ data dignity/
 - **Client Passphrase Crypto Helper**: `crypto.js` using Web Crypto API (`AES-GCM-256`, `PBKDF2`, `TextEncoder/Decoder`) for basic passphrase-based payload encryption/decryption.
 - **Mock DB State**: `mockDb.js` providing in-memory initial state for user preferences, mock vault entries, and mock log entries.
 - **Protocol Simulation**: Interactive visual step-through in UI for `LEGACY` and `SCRUB` execution sequences.
+- **Formal Threat Model & Security Boundaries**: `THREAT_MODEL.md` documenting assets, security goals, trust boundaries, server visibility matrix, threat actors, 9 threat scenarios with mitigations, and 12 mandatory architectural rules.
+- **Formal Cryptographic Key Lifecycle Specification**: `KEY_LIFECYCLE_SPEC.md` documenting key hierarchy, AES-GCM-256 DEK generation, beneficiary key wrapping, out-of-band SHA-256 fingerprint verification, DEK rotation upon revocation, server visibility matrix, failure modes, and security requirements.
+- **Formal State Machine & Inactivity Specification**: `STATE_MACHINE_SPEC.md` documenting 11 core lifecycle states, transition matrix, liveness signal hierarchy, Day 60/75/85/90+ warning schedules, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency locks, failure recovery, and Mermaid state diagram.
 
 ---
 
@@ -72,7 +78,7 @@ data dignity/
 1. **Zero-Knowledge Trust Model**: The server stores only ciphertext and wrapped key material; plaintext assets are encrypted/decrypted strictly on the client.
 2. **Data Encryption Key (DEK) Architecture**: Each vault asset is encrypted with a unique DEK. The DEK itself is wrapped with beneficiary public keys while the user is active.
 3. **Passphrase Independence for Beneficiaries**: Beneficiaries must be able to recover DEKs using their own pre-registered private keys without needing the user's passphrase.
-4. **Beneficiary Authenticity & Fingerprint Verification**: Beneficiary public keys require out-of-band fingerprint verification before being trusted for DEK wrapping.
+4. **Beneficiary Authenticity & Fingerprint Verification**: Beneficiary public keys require out-of-band SHA-256 fingerprint verification before being trusted for DEK wrapping.
 5. **DEK Rotation for True Revocation**: When a beneficiary is revoked, the DEK is rotated and re-wrapped only for remaining verified beneficiaries.
 6. **Liveness Verification Hierarchy**: Dedicated user check-in is the primary liveness signal; OAuth API activity is strictly secondary corroboration.
 7. **Trusted-Contact Escalation**: Designated trusted contacts are notified during warning windows for human escalation, but hold no automated probate authority.
@@ -81,6 +87,9 @@ data dignity/
 10. **Identity Unlinkability**: Identity records and vault storage are decoupled using pseudonymous vault IDs and separate access permissions.
 11. **Truthful Scrub Reporting**: Third-party deletion explicitly tracks `DELETION_REQUESTED`, `DELETION_CONFIRMED`, `DELETION_FAILED`, and `DELETION_UNAVAILABLE`.
 12. **Legal Boundary**: Automated inactivity detection is a technical signal only and does not constitute legal proof of death or probate authorization.
+13. **Unresolved Decisions**:
+    - Asymmetric Key Wrapping Standard: RSA-OAEP-4096 vs. ECDH-ES + AES-KW (`DECISION REQUIRED`).
+    - Secondary OAuth Delay Window: Extension of Warning Stage 1 by up to 14 days without resetting primary $T_{\text{last}}$ (`DECISION REQUIRED`).
 
 ---
 
@@ -120,9 +129,12 @@ npm run preview
 
 ## 8. Completed Work
 
-- **Phase 0 Documentation**: Established initial threat model outline and project specification (`DataDignity_Final_Project_Structure.pdf`, `README.md`).
-- **Project State & Roadmap**: Created `CLAUDE.md` and `DEVELOPMENT_PLAN.md`.
-- **UI Prototype**: Created initial Vite + React application shell in `frontend/`.
+- **Phase 0 Documentation**:
+  - Created `CLAUDE.md` and `DEVELOPMENT_PLAN.md`.
+  - Created `THREAT_MODEL.md` (Formal threat model, trust boundaries, server visibility matrix, 9 threat scenarios with mitigations, 12 mandatory architectural rules).
+  - Created `KEY_LIFECYCLE_SPEC.md` (Formal cryptographic key hierarchy, DEK generation, beneficiary key wrapping, SHA-256 fingerprint verification, DEK rotation, failure modes, implementation boundaries).
+  - Created `STATE_MACHINE_SPEC.md` (Formal lifecycle states, transition matrix, liveness hierarchy, Day 60/75/85/90+ warning schedule, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency rules, Mermaid state diagram).
+- **UI Prototype**: Vite + React application shell in `frontend/`.
 
 ---
 
@@ -133,13 +145,16 @@ npm run preview
 3. **Monolithic App Component**: `frontend/src/App.jsx` contains state handling, simulation steps, and view routing in a single 400+ line file without a structured router (e.g. React Router) or modular state store.
 4. **Mock Database Reliance**: UI state relies entirely on local memory/mock data (`mockDb.js`) without persistent storage or API synchronization.
 5. **No Automated Test Runner**: `package.json` lacks unit testing frameworks (e.g., Vitest, Jest) for testing crypto functions or state machine logic.
+6. **Unresolved Architectural Decisions**:
+    - Asymmetric Key Wrapping Standard: RSA-OAEP-4096 vs. ECDH-ES (P-384) + AES-KW (`DECISION REQUIRED`).
+    - Secondary OAuth Delay Window: Up to 14 days extension of Warning Stage 1 (`DECISION REQUIRED`).
 
 ---
 
 ## 10. Current Phase & Status
 
 - **Current Phase**: Phase 0 — Project Foundation, Threat Model & Architecture
-- **Status**: **IN PROGRESS** (State documentation and development roadmap established; formal threat model and repository structure setup underway).
+- **Status**: **IN PROGRESS** (Threat model, security rules, key lifecycle specification, and state machine specification finalized; initial backend project structure and shared contracts setup remaining).
 
 ---
 
@@ -147,4 +162,4 @@ npm run preview
 
 Set EXACTLY ONE small, actionable task for the next development session:
 
-**Task**: Create `THREAT_MODEL.md` in the root directory documenting the formal zero-knowledge trust boundaries, threat vectors, key lifecycle specification, and security requirements.
+**Task**: Initialize the backend service directory structure (`backend/package.json`, `.env.example`, `server.js` entry point, and directory skeletons for `middleware/`, `services/`, `routes/`, `prisma/`, `jobs/`, `protocols/`) without adding application features or database connections.
