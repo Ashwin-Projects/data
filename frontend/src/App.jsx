@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
-import ServiceStatus from './components/ServiceStatus'
-import InactivityThreshold from './components/Dashboard/InactivityThreshold'
-import TrustedContacts from './components/Dashboard/TrustedContacts'
-import LegacyVault from './components/Dashboard/LegacyVault'
-import ActivityMonitoring from './components/Dashboard/ActivityMonitoring'
+import Dashboard from './pages/Dashboard'
+import VaultManager from './pages/VaultManager'
+import ScrubManager from './pages/ScrubManager'
+import TrustedContactsView from './pages/TrustedContactsView'
+import AuditLogsView from './pages/AuditLogsView'
 
 import {
   getDb,
@@ -15,17 +15,40 @@ import {
   resetDb
 } from './utils/mockDb'
 
-import { Shield, ShieldAlert, CheckCircle2, AlertOctagon, RotateCcw, Send, Mail, Trash2, Database, Key } from 'lucide-react'
+import { ShieldAlert, CheckCircle2, RotateCcw } from 'lucide-react'
+
+const navItems = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'vault', label: 'Legacy Vault' },
+  { id: 'scrub', label: 'Scrub Protocol' },
+  { id: 'contacts', label: 'Trusted Contacts' },
+  { id: 'logs', label: 'Audit Logs' }
+]
+
+const tabMetadata = {
+  overview: {
+    title: 'Security Overview',
+    subtitle: 'End-to-end encrypted estate relay. Activity-gated payload delivery.'
+  },
+  vault: {
+    title: 'Vault Payload Manager',
+    subtitle: 'Client-side encryption interface. Payload deployment and envelope configuration.'
+  },
+  scrub: {
+    title: 'Localized Cryptographic Scrub',
+    subtitle: 'Hardware-isolated erasure vectors. Localized payload sanitization.'
+  },
+  contacts: {
+    title: 'Quorum Signatures',
+    subtitle: 'Multisig escrow routing. Cryptographic trustee assignment.'
+  },
+  logs: {
+    title: 'Ledger Audit Trails',
+    subtitle: 'Chronological execution ledger. Read-only event logging.'
+  }
+}
 
 export default function App() {
-  const navItems = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'vault', label: 'Legacy Vault' },
-    { id: 'scrub', label: 'Scrub Protocol' },
-    { id: 'contacts', label: 'Trusted Contacts' },
-    { id: 'logs', label: 'Audit Logs' }
-  ]
-
   const [activeTab, setActiveTab] = useState('overview')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [dbState, setDbState] = useState(getDb())
@@ -138,176 +161,69 @@ export default function App() {
     showNotification('System database state reset to base seed configuration.')
   }
 
-  // Define contents based on tabs
+  const handleThresholdChange = () => {
+    setDbState(getDb())
+  }
+
+  const handleVaultUpdated = (newVaults) => {
+    setDbState((prev) => ({ ...prev, vaults: newVaults }))
+  }
+
+  const handleRegisterScrubPayload = () => {
+    const db = getDb()
+    db.vaults.unshift({
+      id: Date.now(),
+      user_id: 1,
+      name: 'Confidential_Journal.enc',
+      payload_type: 'SCRUB',
+      cipher_text: '{}',
+      description: 'Hardware-isolated scrub target — zero-fill erasure routing',
+      beneficiary_routing_metadata: 'Self-Destruct Triggered',
+      last_synchronized: new Date().toISOString()
+    })
+    setDbState(db)
+    showNotification('Asset registered under SCRUB policy.')
+  }
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-6">
-            <ServiceStatus />
-            
-            <div className="grid gap-6 lg:grid-cols-2">
-              <InactivityThreshold
-                user={user}
-                onThresholdChange={(days) => setDbState(getDb())}
-                simulatedDays={simulatedDays}
-                setSimulatedDays={setSimulatedDays}
-                onTriggerProtocol={handleTriggerProtocol}
-              />
-              <TrustedContacts />
-            </div>
-
-            <LegacyVault
-              vaults={vaults.slice(0, 3)}
-              onVaultUpdated={(newVaults) => setDbState(prev => ({ ...prev, vaults: newVaults }))}
-            />
-
-            <ActivityMonitoring onHeartbeat={handleHeartbeat} />
-          </div>
+          <Dashboard
+            user={user}
+            vaults={vaults}
+            simulatedDays={simulatedDays}
+            setSimulatedDays={setSimulatedDays}
+            onThresholdChange={handleThresholdChange}
+            onTriggerProtocol={handleTriggerProtocol}
+            onVaultUpdated={handleVaultUpdated}
+            onHeartbeat={handleHeartbeat}
+          />
         )
       case 'vault':
         return (
-          <div className="space-y-6">
-            <LegacyVault
-              vaults={vaults}
-              onVaultUpdated={(newVaults) => setDbState(prev => ({ ...prev, vaults: newVaults }))}
-            />
-          </div>
+          <VaultManager
+            vaults={vaults}
+            onVaultUpdated={handleVaultUpdated}
+          />
         )
       case 'scrub':
-        return (
-          <div className="bg-white border border-[#cbd5e1] rounded-xl p-6 shadow-sm space-y-6">
-            <div className="border-b border-[#cbd5e1] pb-4">
-              <div className="flex items-center gap-2">
-                <Trash2 className="h-5 w-5 text-rose-500" />
-                <h3 className="text-base font-bold text-[#0f172a]">Cryptographic Scrub Protocol</h3>
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Configure localized zero-fill procedures on inactivity threshold breach.
-              </p>
-            </div>
-
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3">
-              <AlertOctagon className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-xs font-bold text-rose-800">Zero-Fill Erasure Policy Alert</h4>
-                <p className="text-xs text-rose-700 mt-1">
-                  Breaching the inactivity threshold triggers the Scrub Protocol. This executes an unrecoverable zero-fill database overwrite and dispatches API erasure payloads to external linked targets.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600">Configured Erasure Endpoints</h4>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">GitHub API Erasure Target</p>
-                    <p className="text-[10px] text-slate-500 font-mono">POST https://api.github.com/user/erasure</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#10b981] bg-[#ebfdf5] px-2 py-0.5 rounded border border-[#bbf7d0]">Linked</span>
-                </div>
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg flex justify-between items-center">
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Google Workspace Erasure Target</p>
-                    <p className="text-[10px] text-slate-500 font-mono">POST https://googleapis.com/drive/purge</p>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#10b981] bg-[#ebfdf5] px-2 py-0.5 rounded border border-[#bbf7d0]">Linked</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-                <p className="text-xs text-slate-500">
-                  Simulate self-destruct by adding a SCRUB asset and advancing the inactivity timeline.
-                </p>
-                <button
-                  onClick={() => {
-                    const db = getDb()
-                    db.vaults.unshift({
-                      id: Date.now(),
-                      user_id: 1,
-                      name: 'Confidential_Journal.enc',
-                      payload_type: 'SCRUB',
-                      cipher_text: '{}',
-                      description: 'Hardware-isolated scrub target — zero-fill erasure routing',
-                      beneficiary_routing_metadata: 'Self-Destruct Triggered',
-                      last_synchronized: new Date().toISOString()
-                    })
-                    setDbState(db)
-                    showNotification('Asset registered under SCRUB policy.')
-                  }}
-                  className="px-3 py-1.5 bg-rose-600 text-white hover:bg-rose-700 text-xs font-bold rounded shadow-sm transition-all"
-                >
-                  Register Scrub Payload
-                </button>
-              </div>
-            </div>
-          </div>
-        )
+        return <ScrubManager onRegisterScrubPayload={handleRegisterScrubPayload} />
       case 'contacts':
-        return (
-          <div className="space-y-6">
-            <TrustedContacts />
-          </div>
-        )
+        return <TrustedContactsView />
       case 'logs':
         return (
-          <div className="bg-white border border-[#cbd5e1] rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#cbd5e1] pb-4 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-[#0f172a]">Secure Audit Ledger</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Cryptographically signed audit logs of heartbeat assertions and credential alterations.
-                </p>
-              </div>
-              <button
-                onClick={handleResetSimulation}
-                className="flex items-center gap-1 px-3 py-1.5 border border-[#cbd5e1] hover:bg-[#f1f5f9] rounded text-xs font-bold text-[#475569] shadow-sm transition-all"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>Reset Audit Database</span>
-              </button>
-            </div>
-
-            <div className="divide-y divide-slate-100">
-              {dbState.logs.map((log) => (
-                <div key={log.id} className="py-3 flex justify-between items-start gap-4">
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">{log.action}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{log.detail}</p>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400 shrink-0">
-                    {new Date(log.timestamp).toLocaleTimeString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <AuditLogsView
+            logs={dbState.logs}
+            onResetSimulation={handleResetSimulation}
+          />
         )
       default:
         return null
     }
   }
 
-  // Get dynamic titles for tab
-  const getTabMetadata = () => {
-    switch (activeTab) {
-      case 'overview':
-        return { title: 'Security Overview', subtitle: 'End-to-end encrypted estate relay. Activity-gated payload delivery.' }
-      case 'vault':
-        return { title: 'Vault Payload Manager', subtitle: 'Client-side encryption interface. Payload deployment and envelope configuration.' }
-      case 'scrub':
-        return { title: 'Localized Cryptographic Scrub', subtitle: 'Hardware-isolated erasure vectors. Localized payload sanitization.' }
-      case 'contacts':
-        return { title: 'Quorum Signatures', subtitle: 'Multisig escrow routing. Cryptographic trustee assignment.' }
-      case 'logs':
-        return { title: 'Ledger Audit Trails', subtitle: 'Chronological execution ledger. Read-only event logging.' }
-      default:
-        return { title: 'Dashboard', subtitle: 'System Control' }
-    }
-  }
-
-  const { title, subtitle } = getTabMetadata()
+  const { title, subtitle } = tabMetadata[activeTab] ?? { title: 'Dashboard', subtitle: 'System Control' }
   const activeTabLabel = navItems.find((item) => item.id === activeTab)?.label ?? 'Overview'
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
