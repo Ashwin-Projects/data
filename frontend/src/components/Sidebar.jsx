@@ -5,22 +5,45 @@ import {
   Lock,
   Trash2,
   Users,
-  FileText
+  FileText,
+  X
 } from 'lucide-react'
 
-export default function Sidebar({ activeTab, setActiveTab }) {
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Activity },
-    { id: 'vault', label: 'Legacy Vault', icon: Lock },
-    { id: 'scrub', label: 'Scrub Protocol', icon: Trash2 },
-    { id: 'contacts', label: 'Trusted Contacts', icon: Users },
-    { id: 'logs', label: 'Audit Logs', icon: FileText },
-  ]
+const iconMap = {
+  overview: Activity,
+  vault: Lock,
+  scrub: Trash2,
+  contacts: Users,
+  logs: FileText
+}
 
-  return (
-    <aside className="w-[260px] border-r border-[#cbd5e1] bg-[#e2e8f0] flex flex-col shadow-sm shrink-0">
-      {/* Brand Header */}
-      <div className="border-b border-[#cbd5e1] px-6 py-6 bg-[#dee4ec]">
+export default function Sidebar({ navItems, activeTab, onTabChange, mobileNavOpen, setMobileNavOpen }) {
+  const renderNavigation = () => (
+    <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+      {navItems.map((item) => {
+        const Icon = iconMap[item.id]
+        const isActive = activeTab === item.id
+        return (
+          <button
+            key={item.id}
+            onClick={() => onTabChange(item.id)}
+            className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-150 ${
+              isActive
+                ? 'bg-[#f8fafc] text-[#2563eb] shadow-sm border border-[#cbd5e1]'
+                : 'text-[#475569] hover:bg-[#dee4ec] hover:text-[#0f172a]'
+            }`}
+          >
+            <Icon className={`h-4 w-4 ${isActive ? 'text-[#2563eb]' : 'text-[#64748b]'}`} />
+            {item.label}
+          </button>
+        )
+      })}
+    </nav>
+  )
+
+  const renderBrand = (showClose = false) => (
+    <div className="border-b border-[#cbd5e1] px-6 py-6 bg-[#dee4ec]">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#cbd5e1] bg-[#f8fafc] shadow-sm">
             <Shield className="h-5 w-5 text-[#2563eb]" />
@@ -34,39 +57,52 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             </p>
           </div>
         </div>
+        {showClose && (
+          <button
+            onClick={() => setMobileNavOpen(false)}
+            className="mt-0.5 inline-flex items-center justify-center rounded-lg border border-[#cbd5e1] bg-white p-2 text-[#475569] shadow-sm hover:bg-[#f1f5f9] transition-all"
+            aria-label="Close navigation menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
+    </div>
+  )
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = activeTab === item.id
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-150 ${
-                isActive
-                  ? 'bg-[#f8fafc] text-[#2563eb] shadow-sm border border-[#cbd5e1]'
-                  : 'text-[#475569] hover:bg-[#dee4ec] hover:text-[#0f172a]'
-              }`}
-            >
-              <Icon className={`h-4 w-4 ${isActive ? 'text-[#2563eb]' : 'text-[#64748b]'}`} />
-              {item.label}
-            </button>
-          )
-        })}
-      </nav>
+  const renderFooter = () => (
+    <div className="p-4 border-t border-[#cbd5e1] bg-[#dee4ec]/40 text-center">
+      <p className="text-[10px] font-bold text-[#64748b] tracking-wide uppercase">
+        Zero-Knowledge Architecture
+      </p>
+      <p className="text-[9px] text-[#94a3b8] mt-0.5">
+        Local AES-GCM-256 Cryptography
+      </p>
+    </div>
+  )
 
-      {/* Bottom Info Banner */}
-      <div className="p-4 border-t border-[#cbd5e1] bg-[#dee4ec]/40 text-center">
-        <p className="text-[10px] font-bold text-[#64748b] tracking-wide uppercase">
-          Zero-Knowledge Architecture
-        </p>
-        <p className="text-[9px] text-[#94a3b8] mt-0.5">
-          Local AES-GCM-256 Cryptography
-        </p>
-      </div>
-    </aside>
+  return (
+    <>
+      <aside className="hidden w-[260px] border-r border-[#cbd5e1] bg-[#e2e8f0] lg:flex flex-col shadow-sm shrink-0">
+        {renderBrand()}
+        {renderNavigation()}
+        {renderFooter()}
+      </aside>
+
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-40 flex lg:hidden">
+          <button
+            className="flex-1 bg-slate-950/40 backdrop-blur-[1px]"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="Close navigation overlay"
+          />
+          <aside className="w-[280px] max-w-[85vw] border-l border-[#cbd5e1] bg-[#e2e8f0] flex flex-col shadow-2xl">
+            {renderBrand(true)}
+            {renderNavigation()}
+            {renderFooter()}
+          </aside>
+        </div>
+      )}
+    </>
   )
 }

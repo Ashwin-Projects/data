@@ -18,7 +18,16 @@ import {
 import { Shield, ShieldAlert, CheckCircle2, AlertOctagon, RotateCcw, Send, Mail, Trash2, Database, Key } from 'lucide-react'
 
 export default function App() {
+  const navItems = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'vault', label: 'Legacy Vault' },
+    { id: 'scrub', label: 'Scrub Protocol' },
+    { id: 'contacts', label: 'Trusted Contacts' },
+    { id: 'logs', label: 'Audit Logs' }
+  ]
+
   const [activeTab, setActiveTab] = useState('overview')
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [dbState, setDbState] = useState(getDb())
   const [simulatedDays, setSimulatedDays] = useState(0)
   
@@ -299,6 +308,11 @@ export default function App() {
   }
 
   const { title, subtitle } = getTabMetadata()
+  const activeTabLabel = navItems.find((item) => item.id === activeTab)?.label ?? 'Overview'
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    setMobileNavOpen(false)
+  }
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] text-[#334155] antialiased font-sans flex relative">
@@ -312,18 +326,26 @@ export default function App() {
       )}
 
       {/* Sidebar navigation */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar
+        navItems={navItems}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        mobileNavOpen={mobileNavOpen}
+        setMobileNavOpen={setMobileNavOpen}
+      />
 
       {/* Main dashboard viewport */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto">
         <Header
           title={title}
           subtitle={subtitle}
+          activeTabLabel={activeTabLabel}
           daysRemaining={daysRemaining}
           triggerManualHeartbeat={handleHeartbeat}
+          onToggleNavigation={() => setMobileNavOpen(true)}
         />
 
-        <div className="flex-1 px-8 py-6 max-w-[1600px] w-full mx-auto space-y-6">
+        <div className="flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 max-w-[1600px] w-full mx-auto space-y-6">
           {renderTabContent()}
         </div>
       </div>

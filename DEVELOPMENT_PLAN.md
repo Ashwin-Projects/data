@@ -5,14 +5,14 @@ This document serves as the master execution roadmap for DataDignity. It reflect
 ---
 
 ## Phase 0 — Project Foundation, Threat Model & Architecture
-**Status**: `IN PROGRESS`
+**Status**: `COMPLETE`
 
 - [x] Inspect existing repository state, PDF specifications, and frontend structure.
 - [x] Establish root-level project management documents (`CLAUDE.md`, `DEVELOPMENT_PLAN.md`).
 - [x] Create `THREAT_MODEL.md` defining zero-knowledge trust boundaries, threat vectors, server visibility matrix, threat scenarios, and security rules.
 - [x] Create `KEY_LIFECYCLE_SPEC.md` defining key hierarchy, AES-GCM-256 DEK generation, beneficiary key-wrapping, SHA-256 fingerprint verification, DEK rotation, and server visibility constraints.
 - [x] Create `STATE_MACHINE_SPEC.md` defining core lifecycle states, transition matrix, liveness hierarchy, Day 60/75/85/90+ warning schedules, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency rules, and Mermaid state diagram.
-- [ ] Establish directory structure for backend service (`backend/package.json`, `server.js`, directory skeletons) and shared contracts.
+- [x] Establish directory structure for backend service (`backend/package.json`, `.env.example`, `server.js` Express foundation, and directory placeholders `middleware/`, `services/`, `routes/`, `prisma/`, `jobs/`, `protocols/`).
 
 ---
 
@@ -44,7 +44,6 @@ This document serves as the master execution roadmap for DataDignity. It reflect
 ## Phase 3 — Vault, Database & Identity Unlinkability
 **Status**: `NOT STARTED`
 
-- [ ] Initialize Express backend application structure (`backend/server.js`, middleware, routes).
 - [ ] Configure PostgreSQL database connection and Prisma ORM schema (`schema.prisma`).
 - [ ] Implement pseudonymous identity architecture separating `users`, `identity_vault_mapping`, and `encrypted_vaults`.
 - [ ] Enforce strict access control on the mapping layer to prevent identity-to-vault correlation.

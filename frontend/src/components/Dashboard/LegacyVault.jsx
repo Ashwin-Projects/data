@@ -81,21 +81,26 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-[#cbd5e1] bg-white shadow-sm">
+    <section
+      className="overflow-hidden rounded-xl border border-[#cbd5e1] bg-white shadow-sm"
+      aria-labelledby="legacy-vault-title"
+    >
       
       {/* Table Title and Actions */}
       <div className="flex items-center justify-between border-b border-[#cbd5e1] bg-[#f8fafc] px-6 py-4">
         <div>
-          <h3 className="text-base font-bold text-[#0f172a]">Legacy Vault</h3>
+          <h3 id="legacy-vault-title" className="text-base font-bold text-[#0f172a]">Legacy Vault</h3>
           <p className="text-xs font-medium text-[#64748b]">
             Zero-knowledge payload matrix. Encrypted archives secured client-side.
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 rounded-lg border border-[#0d9488] bg-[#0d9488] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0f766e] transition-colors"
+          className="flex items-center gap-1.5 rounded-lg border border-[#0d9488] bg-[#0d9488] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#0f766e] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
+          aria-label="Add encrypted vault asset"
         >
-          <Plus className="h-4 w-full md:w-3.5" />
+          <Plus className="h-4 w-full md:w-3.5" aria-hidden="true" />
           <span>Add Asset</span>
         </button>
       </div>
@@ -111,9 +116,16 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
       {/* Grid List */}
       {vaults.length === 0 ? (
         <div className="text-center py-10 bg-slate-50 border-b border-slate-100">
-          <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+          <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2" aria-hidden="true" />
           <p className="text-sm font-bold text-[#0f172a]">Vault Empty</p>
           <p className="text-xs text-slate-500">Add an asset to secure it client-side.</p>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="mt-4 inline-flex items-center justify-center rounded-lg border border-[#0d9488] bg-[#0d9488] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#0f766e] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
+          >
+            Create your first vault asset
+          </button>
         </div>
       ) : (
         vaults.map((entry, index) => {
@@ -131,9 +143,9 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
                   isEven ? 'border-slate-700 bg-slate-800' : 'border-teal-200 bg-teal-50'
                 }`}>
                   {entry.payload_type === 'SCRUB' ? (
-                    <Trash2 className={`h-3.5 w-3.5 ${isEven ? 'text-[#f43f5e]' : 'text-rose-500'}`} />
+                  <Trash2 className={`h-3.5 w-3.5 ${isEven ? 'text-[#f43f5e]' : 'text-rose-500'}`} aria-hidden="true" />
                   ) : (
-                    <Lock className={`h-3.5 w-3.5 ${isEven ? 'text-[#38bdf8]' : 'text-[#0d9488]'}`} />
+                  <Lock className={`h-3.5 w-3.5 ${isEven ? 'text-[#38bdf8]' : 'text-[#0d9488]'}`} aria-hidden="true" />
                   )}
                 </div>
                 <div>
@@ -167,28 +179,32 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
               <div className="col-span-2 flex justify-end gap-1.5">
                 {/* View/Decrypt - Cool Blue Accent */}
                 <button
+                  type="button"
                   onClick={() => handleOpenDecrypt(entry)}
                   className={`flex h-7 w-7 items-center justify-center rounded-md border text-xs font-semibold transition hover:opacity-80 shadow-sm ${
                     isEven 
                       ? 'bg-[#075985] text-[#38bdf8] border-[#0c4a6e]' 
                       : 'bg-[#e0f2fe] text-[#0284c7] border-[#bae6fd]'
-                  }`}
+                  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-1`}
                   title="Decrypt Payload Client-Side"
+                  aria-label={`Decrypt payload for ${entry.name}`}
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
                 
                 {/* Delete button */}
                 <button
+                  type="button"
                   onClick={() => handleDelete(entry.id)}
                   className={`flex h-7 w-7 items-center justify-center rounded-md border text-xs font-semibold transition hover:opacity-80 shadow-sm ${
                     isEven 
                       ? 'bg-red-950 text-red-400 border-red-900' 
                       : 'bg-red-50 text-red-600 border-red-200'
-                  }`}
+                  } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1`}
                   title="Purge Entry"
+                  aria-label={`Delete vault entry ${entry.name}`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -199,34 +215,45 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
       {/* Decrypt Passphrase Modal */}
       {showDecryptModal && selectedVault && (
         <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-[#cbd5e1] rounded-xl max-w-md w-full shadow-2xl p-6 relative">
+          <div
+            className="bg-white border border-[#cbd5e1] rounded-xl max-w-md w-full shadow-2xl p-6 relative"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="decrypt-modal-title"
+          >
             <button
+              type="button"
               onClick={() => setShowDecryptModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 rounded"
+              aria-label="Close decrypt modal"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </button>
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 border border-blue-200">
-                <Unlock className="h-5 w-5 text-blue-600" />
+                <Unlock className="h-5 w-5 text-blue-600" aria-hidden="true" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-[#0f172a]">Decrypt Legacy Payload</h4>
+                <h4 id="decrypt-modal-title" className="text-base font-bold text-[#0f172a]">Decrypt Legacy Payload</h4>
                 <p className="text-xs text-slate-500">Local decryption execution via AES-GCM-256.</p>
               </div>
             </div>
 
             <form onSubmit={handleDecrypt} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                <label htmlFor="decrypt-passphrase" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                   Passphrase Key
                 </label>
                 <input
+                  id="decrypt-passphrase"
                   type="password"
                   placeholder="Enter key to derive AES-GCM matrix"
                   value={passphrase}
                   onChange={(e) => setPassphrase(e.target.value)}
-                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] font-mono"
+                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 font-mono"
+                  aria-invalid={decryptionError ? 'true' : 'false'}
+                  aria-describedby={decryptionError ? 'decrypt-error' : undefined}
+                  autoFocus
                   required
                 />
                 <p className="text-[10px] text-slate-400 mt-1">
@@ -235,13 +262,13 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
               </div>
 
               {decryptionError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-600">
+                <div id="decrypt-error" className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-600" role="alert">
                   {decryptionError}
                 </div>
               )}
 
               {decryptedText && (
-                <div className="p-4 bg-slate-900 border border-slate-800 rounded-lg">
+                <div className="p-4 bg-slate-900 border border-slate-800 rounded-lg" aria-live="polite">
                   <span className="block text-[9px] font-bold text-[#38bdf8] uppercase tracking-wider mb-1">
                     Plaintext Decrypted Payload
                   </span>
@@ -255,13 +282,14 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
                 <button
                   type="button"
                   onClick={() => setShowDecryptModal(false)}
-                  className="px-4 py-2 border border-[#cbd5e1] hover:bg-slate-50 text-xs font-bold rounded-lg text-slate-600"
+                  className="px-4 py-2 border border-[#cbd5e1] hover:bg-slate-50 text-xs font-bold rounded-lg text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#2563eb] text-white hover:bg-blue-600 text-xs font-bold rounded-lg"
+                  disabled={!passphrase.trim()}
+                  className="px-4 py-2 bg-[#2563eb] text-white hover:bg-blue-600 text-xs font-bold rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Decrypt Payload
                 </button>
@@ -274,19 +302,26 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
       {/* Add Asset Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-[#cbd5e1] rounded-xl max-w-lg w-full shadow-2xl p-6 relative">
+          <div
+            className="bg-white border border-[#cbd5e1] rounded-xl max-w-lg w-full shadow-2xl p-6 relative"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-asset-modal-title"
+          >
             <button
+              type="button"
               onClick={() => setShowAddModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2 rounded"
+              aria-label="Close add asset modal"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </button>
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-50 border border-teal-200">
-                <Shield className="h-5 w-5 text-teal-600" />
+                <Shield className="h-5 w-5 text-teal-600" aria-hidden="true" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-[#0f172a]">Create Zero-Knowledge Asset</h4>
+                <h4 id="add-asset-modal-title" className="text-base font-bold text-[#0f172a]">Create Zero-Knowledge Asset</h4>
                 <p className="text-xs text-slate-500">Client-side payload packaging and key synthesis.</p>
               </div>
             </div>
@@ -294,26 +329,28 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
             <form onSubmit={handleCreateAsset} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                  <label htmlFor="asset-name" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                     Asset Name (e.g. key.enc)
                   </label>
                   <input
+                    id="asset-name"
                     type="text"
                     placeholder="Financial_Access.enc"
                     value={assetName}
                     onChange={(e) => setAssetName(e.target.value)}
-                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb]"
+                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                  <label htmlFor="protocol-routing" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                     Protocol Routing
                   </label>
                   <select
+                    id="protocol-routing"
                     value={payloadType}
                     onChange={(e) => setPayloadType(e.target.value)}
-                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] font-bold"
+                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2 font-bold"
                   >
                     <option value="LEGACY">Legacy Transfer (Release on Inactivity)</option>
                     <option value="SCRUB">Scrub Protocol (Wipe on Inactivity)</option>
@@ -322,58 +359,62 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                <label htmlFor="asset-description" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                   Description
                 </label>
                 <input
+                  id="asset-description"
                   type="text"
                   placeholder="Master credentials or ledger archives"
                   value={assetDesc}
                   onChange={(e) => setAssetDesc(e.target.value)}
-                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb]"
+                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
                 />
               </div>
 
               {payloadType === 'LEGACY' && (
                 <div>
-                  <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                  <label htmlFor="beneficiary-email" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                     Beneficiary Email Address (Routing Link)
                   </label>
                   <input
+                    id="beneficiary-email"
                     type="email"
                     placeholder="s.ames@familyoffice-ames.com"
                     value={beneficiaryEmail}
                     onChange={(e) => setBeneficiaryEmail(e.target.value)}
-                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb]"
+                    className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
                     required={payloadType === 'LEGACY'}
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                <label htmlFor="plaintext-payload" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                   Plaintext Secure Payload (Private details)
                 </label>
                 <textarea
+                  id="plaintext-payload"
                   placeholder="Enter private passwords, keys, or decrees. Encrypted locally."
                   value={plainTextPayload}
                   onChange={(e) => setPlainTextPayload(e.target.value)}
                   rows={3}
-                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] font-mono"
+                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2 font-mono"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
+                <label htmlFor="asset-passphrase" className="block text-xs font-bold text-[#475569] uppercase tracking-wider mb-1">
                   Passphrase Key (Synthesized client-side)
                 </label>
                 <input
+                  id="asset-passphrase"
                   type="password"
                   placeholder="Passphrase used to encrypt payload"
                   value={newAssetPassphrase}
                   onChange={(e) => setNewAssetPassphrase(e.target.value)}
-                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] font-mono"
+                  className="w-full text-sm px-3 py-2 bg-slate-50 border border-[#cbd5e1] rounded-lg outline-none focus:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2 font-mono"
                   required
                 />
               </div>
@@ -382,16 +423,17 @@ export default function LegacyVault({ vaults, onVaultUpdated }) {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-[#cbd5e1] hover:bg-slate-50 text-xs font-bold rounded-lg text-slate-600"
+                  className="px-4 py-2 border border-[#cbd5e1] hover:bg-slate-50 text-xs font-bold rounded-lg text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={encrypting}
-                  className="px-4 py-2 bg-[#0d9488] text-white hover:bg-[#0f766e] text-xs font-bold rounded-lg flex items-center gap-1"
+                  className="px-4 py-2 bg-[#0d9488] text-white hover:bg-[#0f766e] text-xs font-bold rounded-lg flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0d9488] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+                  aria-busy={encrypting ? 'true' : 'false'}
                 >
-                  {encrypting ? 'Encrypting...' : 'Encrypt Payload'}
+                  {encrypting ? 'Encrypting payload...' : 'Encrypt Payload'}
                 </button>
               </div>
             </form>

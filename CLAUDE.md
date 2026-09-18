@@ -18,6 +18,16 @@ data dignity/
 ├── THREAT_MODEL.md                      # Threat model, trust boundaries & security rules
 ├── KEY_LIFECYCLE_SPEC.md                # Key hierarchy, DEK wrapping, fingerprinting & rotation spec
 ├── STATE_MACHINE_SPEC.md                # Inactivity states, warning schedules, cancellation & safety gate spec
+├── backend/                             # Express backend service foundation
+│   ├── .env.example                     # Environment configuration placeholder
+│   ├── package.json                     # Minimal backend dependencies (Express 4, CORS, dotenv)
+│   ├── server.js                        # Express server entry point & /health endpoint
+│   ├── middleware/                      # Middleware placeholder directory (.gitkeep)
+│   ├── services/                        # Service logic placeholder directory (.gitkeep)
+│   ├── routes/                          # Route controllers placeholder directory (.gitkeep)
+│   ├── prisma/                          # Database schema placeholder directory (.gitkeep)
+│   ├── jobs/                            # Background cron jobs placeholder directory (.gitkeep)
+│   └── protocols/                       # Legacy/Scrub protocol handlers placeholder directory (.gitkeep)
 └── frontend/                            # React + Vite frontend application
     ├── index.html                       # HTML entry point
     ├── package.json                     # Frontend dependencies (React 18, Vite 5, TailwindCSS 3)
@@ -42,8 +52,6 @@ data dignity/
             └── mockDb.js                # LocalStorage / state mock database for UI prototype
 ```
 
-> **Note**: The backend directory (`backend/`), database schema (`prisma/`), and production cryptographic key-wrapping/DEK services do not exist in the repository yet.
-
 ---
 
 ## 3. Current Implemented Functionality
@@ -56,6 +64,7 @@ data dignity/
 - **Formal Threat Model & Security Boundaries**: `THREAT_MODEL.md` documenting assets, security goals, trust boundaries, server visibility matrix, threat actors, 9 threat scenarios with mitigations, and 12 mandatory architectural rules.
 - **Formal Cryptographic Key Lifecycle Specification**: `KEY_LIFECYCLE_SPEC.md` documenting key hierarchy, AES-GCM-256 DEK generation, beneficiary key wrapping, out-of-band SHA-256 fingerprint verification, DEK rotation upon revocation, server visibility matrix, failure modes, and security requirements.
 - **Formal State Machine & Inactivity Specification**: `STATE_MACHINE_SPEC.md` documenting 11 core lifecycle states, transition matrix, liveness signal hierarchy, Day 60/75/85/90+ warning schedules, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency locks, failure recovery, and Mermaid state diagram.
+- **Backend Service Directory Foundation**: `backend/package.json`, `backend/.env.example`, `backend/server.js` Express entry point with `/health` route, and 6 architectural directory placeholders (`middleware/`, `services/`, `routes/`, `prisma/`, `jobs/`, `protocols/`).
 
 ---
 
@@ -66,8 +75,8 @@ data dignity/
 | **Frontend Framework** | React 18, Vite 5 | Implemented |
 | **Styling** | TailwindCSS 3, Lucide React icons | Implemented |
 | **Client Cryptography** | Web Crypto API (SubtleCrypto) | Prototype helper in `frontend/src/utils/crypto.js` |
-| **Backend API** | Node.js / Express | Not Started (Backend directory missing) |
-| **Database** | PostgreSQL + Prisma ORM | Not Started |
+| **Backend API** | Node.js / Express 4 | Foundation skeleton in `backend/server.js` |
+| **Database** | PostgreSQL + Prisma ORM | Not Started (Directory placeholder ready) |
 | **Authentication** | JWT / Session auth | Not Started |
 | **OAuth Corroboration** | GitHub, Google Workspace, LinkedIn OAuth2 | Not Started |
 
@@ -87,7 +96,7 @@ data dignity/
 10. **Identity Unlinkability**: Identity records and vault storage are decoupled using pseudonymous vault IDs and separate access permissions.
 11. **Truthful Scrub Reporting**: Third-party deletion explicitly tracks `DELETION_REQUESTED`, `DELETION_CONFIRMED`, `DELETION_FAILED`, and `DELETION_UNAVAILABLE`.
 12. **Legal Boundary**: Automated inactivity detection is a technical signal only and does not constitute legal proof of death or probate authorization.
-13. **Unresolved Decisions**:
+13. **Unresolved Architectural Decisions**:
     - Asymmetric Key Wrapping Standard: RSA-OAEP-4096 vs. ECDH-ES + AES-KW (`DECISION REQUIRED`).
     - Secondary OAuth Delay Window: Extension of Warning Stage 1 by up to 14 days without resetting primary $T_{\text{last}}$ (`DECISION REQUIRED`).
 
@@ -106,7 +115,8 @@ data dignity/
 ### Code Conventions
 - Frontend components reside in `frontend/src/components/`.
 - Utility helpers reside in `frontend/src/utils/`.
-- JavaScript standard ES modules (`import/export`) are used across `frontend/`.
+- Backend entry point resides in `backend/server.js`.
+- JavaScript standard ES modules (`import/export`) are used across `frontend/` and `backend/`.
 
 ### Existing Validation Commands
 Run from the `frontend/` directory:
@@ -125,26 +135,34 @@ npm run lint
 npm run preview
 ```
 
+Run from the `backend/` directory:
+
+```bash
+# Start Express backend server foundation
+npm start
+```
+
 ---
 
 ## 8. Completed Work
 
-- **Phase 0 Documentation**:
+- **Phase 0 (Project Foundation, Threat Model & Architecture)**: **COMPLETED**
   - Created `CLAUDE.md` and `DEVELOPMENT_PLAN.md`.
   - Created `THREAT_MODEL.md` (Formal threat model, trust boundaries, server visibility matrix, 9 threat scenarios with mitigations, 12 mandatory architectural rules).
   - Created `KEY_LIFECYCLE_SPEC.md` (Formal cryptographic key hierarchy, DEK generation, beneficiary key wrapping, SHA-256 fingerprint verification, DEK rotation, failure modes, implementation boundaries).
   - Created `STATE_MACHINE_SPEC.md` (Formal lifecycle states, transition matrix, liveness hierarchy, Day 60/75/85/90+ warning schedule, cancellation mechanics, trusted contact role, 9-check Final Eligibility Safety Gate, `SAFE_HOLD` triggers, idempotency rules, Mermaid state diagram).
+  - Created `backend/` directory structure (`package.json`, `.env.example`, `server.js` Express foundation entry point, and directory placeholders for `middleware/`, `services/`, `routes/`, `prisma/`, `jobs/`, `protocols/`).
 - **UI Prototype**: Vite + React application shell in `frontend/`.
 
 ---
 
 ## 9. Known Issues & Limitations Discovered
 
-1. **Backend Directory Missing**: `backend/` directory, Express API, database schema, and server code documented in `README.md` do not exist in the filesystem yet.
-2. **Simplified Crypto Prototype**: `frontend/src/utils/crypto.js` currently uses PBKDF2 passphrase derivation only; it does not implement DEK generation, beneficiary key wrapping, or Web Crypto RSA-OAEP / ECDH key management.
-3. **Monolithic App Component**: `frontend/src/App.jsx` contains state handling, simulation steps, and view routing in a single 400+ line file without a structured router (e.g. React Router) or modular state store.
+1. **Backend Database Not Yet Connected**: PostgreSQL database connections, Prisma ORM schema, and migrations are not yet initialized (scheduled for Phase 3).
+2. **Simplified Crypto Prototype**: `frontend/src/utils/crypto.js` currently uses PBKDF2 passphrase derivation only; it does not implement DEK generation, beneficiary key wrapping, or Web Crypto RSA-OAEP / ECDH key management (scheduled for Phase 2).
+3. **Monolithic App Component**: `frontend/src/App.jsx` contains state handling, simulation steps, and view routing in a single 400+ line file without a structured router (e.g. React Router) or modular state store (Phase 1 task).
 4. **Mock Database Reliance**: UI state relies entirely on local memory/mock data (`mockDb.js`) without persistent storage or API synchronization.
-5. **No Automated Test Runner**: `package.json` lacks unit testing frameworks (e.g., Vitest, Jest) for testing crypto functions or state machine logic.
+5. **No Automated Test Runner**: `package.json` files lack unit testing frameworks (e.g., Vitest, Jest) for testing crypto functions or state machine logic.
 6. **Unresolved Architectural Decisions**:
     - Asymmetric Key Wrapping Standard: RSA-OAEP-4096 vs. ECDH-ES (P-384) + AES-KW (`DECISION REQUIRED`).
     - Secondary OAuth Delay Window: Up to 14 days extension of Warning Stage 1 (`DECISION REQUIRED`).
@@ -153,8 +171,8 @@ npm run preview
 
 ## 10. Current Phase & Status
 
-- **Current Phase**: Phase 0 — Project Foundation, Threat Model & Architecture
-- **Status**: **IN PROGRESS** (Threat model, security rules, key lifecycle specification, and state machine specification finalized; initial backend project structure and shared contracts setup remaining).
+- **Current Phase**: Phase 0 — Project Foundation, Threat Model & Architecture (**COMPLETED**) / Phase 1 — Application Shell & UI Foundation (**IN PROGRESS**)
+- **Status**: **Phase 0 COMPLETE** (All architecture documents, threat models, key lifecycle specs, state machine specs, and backend foundation established). Moving to Phase 1.
 
 ---
 
@@ -162,4 +180,4 @@ npm run preview
 
 Set EXACTLY ONE small, actionable task for the next development session:
 
-**Task**: Initialize the backend service directory structure (`backend/package.json`, `.env.example`, `server.js` entry point, and directory skeletons for `middleware/`, `services/`, `routes/`, `prisma/`, `jobs/`, `protocols/`) without adding application features or database connections.
+**Task**: Modularize the monolithic `frontend/src/App.jsx` component by creating distinct page views (`Dashboard.jsx`, `VaultManager.jsx`, `ScrubManager.jsx`, `TrustedContactsView.jsx`, `AuditLogsView.jsx`) under `frontend/src/pages/`.
